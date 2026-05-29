@@ -94,9 +94,9 @@ void game_run(Game *game)
 
     board_print(&game->board, 1);
     if (game->status == GAME_WON) {
-        printf("You win! All safe cells were revealed.\n");
+        printf("恭喜，你成功清除了所有安全格！\n");
     } else if (game->status == GAME_LOST) {
-        printf("Boom! You stepped on a mine.\n");
+        printf("可惜，你踩到地雷了，遊戲結束。\n");
     } else {
         printf("Game exited.\n");
     }

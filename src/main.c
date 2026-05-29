@@ -1,6 +1,9 @@
 #include "game.h"
 
 #include <stdio.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #define DEFAULT_ROWS 9
 #define DEFAULT_COLS 9
@@ -14,6 +17,12 @@ int main(void)
     int rows = DEFAULT_ROWS;
     int cols = DEFAULT_COLS;
     int mines = DEFAULT_MINES;
+    char line[8];
+
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
 
     printf("Welcome to C Minesweeper.\n");
     printf("Default board: %d x %d, mines: %d.\n", DEFAULT_ROWS, DEFAULT_COLS, DEFAULT_MINES);
@@ -32,6 +41,9 @@ int main(void)
 
     game_run(&game);
     game_destroy(&game);
+
+    printf("Press Enter to close...");
+    fgets(line, sizeof(line), stdin);
     return 0;
 }
 
