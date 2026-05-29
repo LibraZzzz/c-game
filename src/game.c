@@ -1,0 +1,129 @@
+#include "game.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+static void print_commands(void);
+static int read_command(char *command, int *row, int *col);
+
+int game_init(Game *game, int rows, int cols, int mines)
+{
+    if (game == NULL) {
+        return 0;
+    }
+
+    if (!board_create(&game->board, rows, cols, mines)) {
+        return 0;
+    }
+
+    game->status = GAME_RUNNING;
+    game->firstMove = 1;
+    srand((unsigned int)time(NULL));
+    return 1;
+}
+
+void game_destroy(Game *game)
+{
+    if (game == NULL) {
+        return;
+    }
+
+    board_destroy(&game->board);
+    game->status = GAME_QUIT;
+    game->firstMove = 0;
+}
+
+void game_run(Game *game)
+{
+    if (game == NULL) {
+        return;
+    }
+
+    print_commands();
+
+    while (game->status == GAME_RUNNING) {
+        char command;
+        int row;
+        int col;
+        int result;
+
+        board_print(&game->board, 0);
+        printf("請輸入指令: ");
+
+        if (!read_command(&command, &row, &col)) {
+            printf("輸入格式錯誤，請使用 r 行 列、f 行 列 或 q。\n");
+            continue;
+        }
+
+        if (command == 'q' || command == 'Q') {
+            game->status = GAME_QUIT;
+            break;
+        }
+
+        row--;
+        col--;
+        if (!board_is_inside(&game->board, row, col)) {
+            printf("座標超出棋盤範圍。\n");
+            continue;
+        }
+
+        if (command == 'f' || command == 'F') {
+            board_toggle_flag(&game->board, row, col);
+            continue;
+        }
+
+        if (command != 'r' && command != 'R') {
+            printf("未知指令，請使用 r、f 或 q。\n");
+            continue;
+        }
+
+        if (game->firstMove) {
+            board_place_mines(&game->board, row, col);
+            board_calculate_adjacent_counts(&game->board);
+            game->firstMove = 0;
+        }
+
+        result = board_reveal(&game->board, row, col);
+        if (result == -1) {
+            game->status = GAME_LOST;
+        } else if (board_all_safe_cells_revealed(&game->board)) {
+            game->status = GAME_WON;
+        }
+    }
+
+    board_print(&game->board, 1);
+    if (game->status == GAME_WON) {
+        printf("恭喜，你成功清除了所有安全格！\n");
+    } else if (game->status == GAME_LOST) {
+        printf("踩到地雷，遊戲結束。\n");
+    } else {
+        printf("已離開遊戲。\n");
+    }
+}
+
+static void print_commands(void)
+{
+    printf("=== C Minesweeper ===\n");
+    printf("指令說明：\n");
+    printf("  r 行 列  翻開指定格，例如 r 2 3\n");
+    printf("  f 行 列  標記或取消旗標，例如 f 4 1\n");
+    printf("  q       離開遊戲\n");
+}
+
+static int read_command(char *command, int *row, int *col)
+{
+    char line[128];
+    int count;
+
+    if (fgets(line, sizeof(line), stdin) == NULL) {
+        return 0;
+    }
+
+    count = sscanf(line, " %c %d %d", command, row, col);
+    if (*command == 'q' || *command == 'Q') {
+        return count >= 1;
+    }
+
+    return count == 3;
+}
