@@ -49,10 +49,10 @@ void game_run(Game *game)
         int result;
 
         board_print(&game->board, 0);
-        printf("請輸入指令: ");
+        printf("Enter command: ");
 
         if (!read_command(&command, &row, &col)) {
-            printf("輸入格式錯誤，請使用 r 行 列、f 行 列 或 q。\n");
+            printf("Invalid input. Use r row col, f row col, or q.\n");
             continue;
         }
 
@@ -64,7 +64,7 @@ void game_run(Game *game)
         row--;
         col--;
         if (!board_is_inside(&game->board, row, col)) {
-            printf("座標超出棋盤範圍。\n");
+            printf("Position is outside the board.\n");
             continue;
         }
 
@@ -74,7 +74,7 @@ void game_run(Game *game)
         }
 
         if (command != 'r' && command != 'R') {
-            printf("未知指令，請使用 r、f 或 q。\n");
+            printf("Unknown command. Use r, f, or q.\n");
             continue;
         }
 
@@ -94,21 +94,21 @@ void game_run(Game *game)
 
     board_print(&game->board, 1);
     if (game->status == GAME_WON) {
-        printf("恭喜，你成功清除了所有安全格！\n");
+        printf("You win! All safe cells were revealed.\n");
     } else if (game->status == GAME_LOST) {
-        printf("踩到地雷，遊戲結束。\n");
+        printf("Boom! You stepped on a mine.\n");
     } else {
-        printf("已離開遊戲。\n");
+        printf("Game exited.\n");
     }
 }
 
 static void print_commands(void)
 {
     printf("=== C Minesweeper ===\n");
-    printf("指令說明：\n");
-    printf("  r 行 列  翻開指定格，例如 r 2 3\n");
-    printf("  f 行 列  標記或取消旗標，例如 f 4 1\n");
-    printf("  q       離開遊戲\n");
+    printf("Commands:\n");
+    printf("  r row col  reveal a cell, for example: r 2 3\n");
+    printf("  f row col  toggle a flag, for example: f 4 1\n");
+    printf("  q          quit the game\n");
 }
 
 static int read_command(char *command, int *row, int *col)
